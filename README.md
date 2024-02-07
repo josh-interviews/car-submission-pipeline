@@ -15,3 +15,9 @@ pip install -r requirements.txt
 ```python
 #TODO
 ```
+
+## Interview-related notes:
+* I've chosen the postgres backend due it's high-level support for native JSON querying. However, I specifically chose an ORM library which can be moved to cloud support natively by changing environment variables, and can also be easily refactored to cloud-native DBs in case greater scale is needed, or we need to go full noSQL.
+* I've set this up to be stateless, to allow deployments such as a Kubernetes `CronJobs` or as a serverless function
+* I am assuming the DB schema will not change frequently, as such, db "migrations" will be managed manually. 
+* 
