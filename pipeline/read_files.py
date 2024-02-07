@@ -4,8 +4,8 @@ import re
 import shutil
 import time
 
-from pipeline.base import Session
-from pipeline.db_types import LastRun, ObjectsDetection
+from base import Session
+from db_types import ObjectsDetection, VehicleStatus, LastRun
 from sqlalchemy import desc
 
 
@@ -17,8 +17,9 @@ class SubmissionFile:
 
     def __enter__(self):
         self.session = Session()
+        return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.session.close()
 
     def _list_new_files(self):
@@ -42,6 +43,9 @@ class SubmissionFile:
     def _process_objects_detection(self, obj):
         return ObjectsDetection(**obj)
 
+    def _process_vehicle_status(self, obj):
+        return VehicleStatus(**obj)
+
     def process_files(self):
         # Setup directory for processed files:
         os.makedirs('processed_filedir', exist_ok=True)
@@ -54,9 +58,11 @@ class SubmissionFile:
                 file_name = os.path.basename(filepath)
                 if file_name.startswith('objects_detection'):
                     contents = self._process_objects_detection(file_contents)
-                    self.session.add(contents)
-                    self.session.commit()
-                    shutil.move(filepath, f'{self.processed_filedir}file_name')
+                else:
+                    contents = self._process_vehicle_status(file_contents)
+                self.session.add(contents)
+                self.session.commit()
+                shutil.move(filepath, f'{self.processed_filedir}file_name')
 
         now = time.time()
         this_run = LastRun(last_run=now)
