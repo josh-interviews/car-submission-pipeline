@@ -33,7 +33,7 @@ python pipeline/run.py
 * I'm assuming filename timestamps on the files are in unix format 
 * Improvements, were there to be more time:
   * Add type annotations
-  * Add test, specifically on validation and parsing
+  * Add tests, specifically on validation and parsing
   * Ensure dupilicates don't make it into the database. Probably by enforcing DB-level uniqueness constraints between time and `vehicle_id`.
   * Move old files which are not processed as part of this run to the 'processed' directory
   * Make sure to use filepath types (see typing)
