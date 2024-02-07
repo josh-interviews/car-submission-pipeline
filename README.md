@@ -13,8 +13,9 @@
   * `POSTGRES_HOST`
   * `POSTGRES_PORT`
   * `POSTGRES_DB` 
+  * `FILE_DIRECTORY`
+* If this is being run in a cloud or containerized environment, the input-files directory can be mounted in and then specified using the environment variables.
 * Use the package manager [pip](https://pip.pypa.io/en/stable/) to install `car-submission-pipeline`.
-  * 
 
 ```bash
 pip install -r requirements.txt
@@ -23,13 +24,13 @@ pip install -r requirements.txt
 ## Usage
 
 ```python
-#TODO
+python pipeline/run.py 
 ```
 
 ## Interview-related notes:
 * I've chosen the postgres backend due it's high-level support for native JSON querying. However, I specifically chose an ORM library which can be moved to cloud support natively by changing environment variables, and can also be easily refactored to cloud-native DBs in case greater scale is needed, or we need to go full noSQL.
 * I've set this up to be stateless, to allow deployments such as a Kubernetes `CronJobs` or as a serverless function
-* I'm assuming timestamps are in unix format 
+* I'm assuming filename timestamps on the files are in unix format 
 * Improvements, were there to be more time:
   * Add type annotations
   * Add test, specifically on validation and parsing
@@ -38,4 +39,5 @@ pip install -r requirements.txt
   * Make sure to use filepath types (see typing)
   * Scale - this isn't easily multithreaded. If we're hitting scale issues, split the reading of files into different threads by splitting the file-list in `SubmissionFile.process_files`
   * Exception handling and logging (always need more of that). Specifically, I spent a while dealing with input issues. We need to be more lenient on input, or ensure more sanitized data.
-  * 
+  * Make the file interface more generic to support cloud storage or an FTP server etc...
+  * In CI, replace `psycopg2-binary` with `psycopg2` (after installing prerequisites) for production run
