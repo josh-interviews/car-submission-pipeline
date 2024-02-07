@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import re
 import shutil
@@ -7,6 +8,7 @@ import time
 from base import Session
 from db_types import ObjectsDetection, VehicleStatus, LastRun
 from sqlalchemy import desc
+from datetime import datetime
 
 
 class SubmissionFile:
@@ -25,6 +27,10 @@ class SubmissionFile:
     def _list_new_files(self):
         last_run = (
             self.session.query(LastRun).order_by(desc('last_run')).first())
+
+        # Handle first run:
+        last_run = LastRun(0)
+
         new_files = []
         all_files = os.listdir(self.filedir)
         prog = re.compile(self.filepath_regex)
@@ -35,36 +41,42 @@ class SubmissionFile:
                 continue
             # If this file is newer than the last run, add it to the list of
             # files to be processed
-            if match.group('timestamp') > last_run:
+            if int(match.group('timestamp')) > last_run.last_run:
                 new_files.append(file)
 
         return new_files
 
     def _process_objects_detection(self, obj):
-        return ObjectsDetection(**obj)
+        detections = []
+        for detection in obj['objects_detection_events']:
+            detections.append(ObjectsDetection(**detection))
+        return detections
 
     def _process_vehicle_status(self, obj):
-        return VehicleStatus(**obj)
+        statuses = []
+        for status in obj['vehicle_status']:
+            statuses.append(VehicleStatus(**status))
+        return statuses
 
     def process_files(self):
         # Setup directory for processed files:
-        os.makedirs('processed_filedir', exist_ok=True)
+        os.makedirs(self.processed_filedir, exist_ok=True)
 
         files = self._list_new_files()
 
-        for filepath in files:
+        for file_name in files:
+            filepath = os.path.join(self.filedir, file_name)
             with open(filepath) as file:
-                file_contents = file.read()
-                file_name = os.path.basename(filepath)
+                file_contents = json.load(file)
                 if file_name.startswith('objects_detection'):
                     contents = self._process_objects_detection(file_contents)
                 else:
                     contents = self._process_vehicle_status(file_contents)
-                self.session.add(contents)
+                self.session.add_all(contents)
                 self.session.commit()
                 shutil.move(filepath, f'{self.processed_filedir}file_name')
 
-        now = time.time()
+        now = datetime.now()
         this_run = LastRun(last_run=now)
         self.session.add(this_run)
         self.session.commit()
