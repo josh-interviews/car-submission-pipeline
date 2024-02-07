@@ -1,14 +1,13 @@
-import glob
 import json
 import os
 import re
 import shutil
-import time
+from datetime import datetime
+
+from sqlalchemy import desc
 
 from base import Session
 from db_types import ObjectsDetection, VehicleStatus, LastRun
-from sqlalchemy import desc
-from datetime import datetime
 
 
 class SubmissionFile:
@@ -29,7 +28,8 @@ class SubmissionFile:
             self.session.query(LastRun).order_by(desc('last_run')).first())
 
         # Handle first run:
-        last_run = LastRun(0)
+        if last_run is None:
+            last_run = LastRun(0)
 
         new_files = []
         all_files = os.listdir(self.filedir)
@@ -46,13 +46,15 @@ class SubmissionFile:
 
         return new_files
 
-    def _process_objects_detection(self, obj):
+    @staticmethod
+    def _process_objects_detection(obj):
         detections = []
         for detection in obj['objects_detection_events']:
             detections.append(ObjectsDetection(**detection))
         return detections
 
-    def _process_vehicle_status(self, obj):
+    @staticmethod
+    def _process_vehicle_status(obj):
         statuses = []
         for status in obj['vehicle_status']:
             statuses.append(VehicleStatus(**status))

@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Integer, DateTime, JSON
 
 from base import Base
 
+
 class ObjectsDetection(Base):
     __tablename__ = 'objects_detection'
 
