@@ -4,7 +4,17 @@
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install `car-submission-pipeline`.
+* A PostgresSQL database needs to be available and properly configured
+  * The database specified in the `POSTGRES_DB` variable has to exist
+  * The user specified in the `POSTGRES_USER` has to have access to that database
+* The following envionment variable must be set: 
+  * `POSTGRES_USER`
+  * `POSTGRES_PASS`
+  * `POSTGRES_HOST`
+  * `POSTGRES_PORT`
+  * `POSTGRES_DB` 
+* Use the package manager [pip](https://pip.pypa.io/en/stable/) to install `car-submission-pipeline`.
+  * 
 
 ```bash
 pip install -r requirements.txt

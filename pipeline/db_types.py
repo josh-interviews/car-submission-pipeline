@@ -29,7 +29,7 @@ class VehicleStatus(Base):
 
 
 class LastRun(Base):
+    __tablename__ = 'last_run'
+
     id = Column(Integer, primary_key=True)
     last_run = Column(DateTime, nullable=False)
-
-
